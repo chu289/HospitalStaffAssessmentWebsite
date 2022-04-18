@@ -4,7 +4,8 @@
     <div class="announcement">
       <Carousel :autoplay="2000" :wrap-around="true" ref="myCarousel">
         <Slide v-for="(imgsrc,index) in imgs" :key="index">
-           <div class="carousel__item"><img :src="imgsrc" alt=""></div>
+          <!-- <div class="carousel__item">{{ slide }}</div> -->
+          <div class="carousel__item"><img :src="imgsrc" alt=""></div>
         </Slide>
 
         <template #addons>
@@ -15,7 +16,6 @@
       <!-- <input type="text" v-model="userID" />
       <button @click="changeUser">USER</button> -->
     </div>
-
     <div class="ratingBarFrame">
       <div class="ratingBar">
         <p>評分</p>
@@ -27,7 +27,7 @@
           active-color="#F6DC66"
           :star-size="130"
           @update:rating="setRating"
-
+          @click="isShow = !isShow"
         >
         </star-rating>
 
@@ -52,9 +52,8 @@
         </div>
       </div>
 
-      <!-- <router-link :to="`/users/${userID}`">{{ userID }}</router-link> -->
+      <router-link :to="`/users/${userID}`">{{ userID }}</router-link>
     </div>
-
     <Popup
       class="signOut"
       :showDialog="showSignOutDialog"
@@ -69,42 +68,13 @@
       </div>
     </Popup>
   </div>
-   <!-- <h2 class="rating_text_content__mobile">評分</h2>
-  <div class="rating_wrap__mobile">
-    <div class="rating_text">
-     
-    </div>
-    <star-rating
-      :increment="1"
-      :max-rating="5"
-      v-model:rating="initialRate"
-      inactive-color="#E5E5E5"
-      active-color="#F6DC66"
-      :star-size="120"
-      @update:rating="setRating"
-      @click="isShow = !isShow"
-    >
-    </star-rating>
-
-
-  </div>
-      <transition>
-      <div class="thanks__mobile" v-show="isShow">
-        <div class="thanks_title__mobile">評分已送出!</div>
-        <div class="thanks_txt__mobile">
-          感謝您撥冗留下您的評分<br />
-          您的評分使我們變得更好<br />
-          國泰醫院很榮幸為您服務<br />
-        </div>
-      </div>
-    </transition> -->
 </template>
 
 <script>
 import StarRating from 'vue-star-rating'
 import { ref } from 'vue'
 import axios from 'axios'
-import { useRoute,useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import Popup from '../component/Popup/index.vue'
 
 //import { defineComponent } from 'vue'
@@ -116,7 +86,7 @@ export default {
     Popup,
     Carousel,
     Slide,
-    Pagination,
+    Pagination
   },
 
   setup() {
@@ -128,50 +98,38 @@ export default {
     const qrcodePath = ref('@/assets/A001.png')
     const limitedInterval = ref(null)
     const router = useRouter()
-    const route = useRoute()
     const showSignOutDialog = ref(false)
     const isShow = ref(false)
     const imgs = ref([])
-    //  onMounted(() => {
-    //        //  changeUser()
-    //        console.log(this.$route.params.userID);
-    //      })
-    //  imgs:[
-    //    {src:"https://picsum.photos/300/300/?random=10"}
-    //  ]
+    // onMounted(() => {
+    //       //  changeUser()
+    //       console.log(this.$route.params.userID);
+    //     })
+    // imgs:[
+    //   {src:"https://picsum.photos/300/300/?random=10"}
+    // ]
 
-    /*if(!route.params.id){
-        alert("錯誤，請重新登入(不能直接更改網址)");
-        router.replace({ path: '/' });
-    }*/
     function setRating(parmValue) {
-        console.log(route.params);
-        rating.value = parmValue;
-        axios
-          .post('https://hospitalstaffassessmentserver.azurewebsites.net:443/score', {
-            score: rating.value,
-            employee_ID: route.params.id,//route.params.id
-            // Comment: '',
-            // place_ID: place_ID.value,
+      rating.value = parmValue
+      axios
+        .post('https://hospitalstaffassessmentserver.azurewebsites.net:443/score', {
+          score: rating.value,
+          employee_ID: '',
+          // Comment: '',
+          // place_ID: place_ID.value,
         })
         .then((res) => {
-          console.log(res);
-          if(res.data=="NO"){
-            initialRate.value = 0;
-            rating.value = 0;
-            alert("評分失敗");
-          }else{
-            isShow.value = !isShow.value;
-            setTimeout(function () {
-              isShow.value = false
-              initialRate.value = 0
-              rating.value = 0
-            }, 3000)
-          }
+          console.log(res)
         })
         .catch((err) => {
           console.log(err)
         })
+
+      setTimeout(function () {
+        isShow.value = false
+        initialRate.value = 0
+        rating.value = 0
+      }, 3000)
     }
 
     // function getqrcode() {
@@ -196,21 +154,18 @@ export default {
     }
 
     function changeUser() {
-    if(!this.$route.params.id){
-        alert("錯誤，請重新登入(不能直接更改網址)");
-        router.replace({ path: '/' });
-    }
+      
       // qrcodePath.value = require(`@/assets/${userID.value}.png`)
       qrcodePath.value = require(`@/assets/${this.$route.params.userID}.png`)
 
       // router.push({ path: '/users/' + userID.value })
-      console.log(qrcodePath.value);
+      getAnnouncements();
+    
     }
-
+    
     function getAnnouncements(){
-      axios
-        // .get('https://hospitalstaffassessmentserver.azurewebsites.net:443/announcements')
-        .get('https://hospitalstaffassessmentserver.azurewebsites.net:443/announcementstest')
+    axios
+        .get('https://hospitalstaffassessmentserver.azurewebsites.net:443/announcements')
         //'https://hospitalstaffassessmentserver.azurewebsites.net:443/announcementstest'公告測試
         .then((res) => {
           imgs.value.splice(0, imgs.value.length);//清空陣列
@@ -225,24 +180,34 @@ export default {
         .catch((err) => {
           console.log(err)
         })
+        console.log(userID);
     }
-    
 
     function reFetch(seconds){
       setTimeout(function () {
+        console.log(0);
         getAnnouncements();
       }, seconds*1000)
     }
+
     function closeSingOut() {
       showSignOutDialog.value = false
     }
 
     function handleSignOutConfirm() {
-      showSignOutDialog.value = false
-      // this.$route.params.userID = ''
-      router.replace({ path: '/' })
+      axios
+        .post('https://hospitalstaffassessmentserver.azurewebsites.net:443/logout', {
+          ID: '',//this.$route.params.userID
+        })
+        .then((res) => {
+          console.log(`登出是否成功：${res.data}`)
+          showSignOutDialog.value = false
+          router.push({ path: '/login' })
+        })
+        .catch((err) => {
+          console.log(err)
+        })
     }
-    getAnnouncements();
 
     return {
       rating,
@@ -265,12 +230,8 @@ export default {
     }
   },
   mounted() {
-    this.changeUser();
-  },
-  //mounted()不重新整理，直接更改網址，QRcode不更新
-  beforeUpdate() {
-    this.changeUser();
-  },
+    this.changeUser()
+  }
 }
 </script>
 

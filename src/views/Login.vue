@@ -42,13 +42,18 @@ export default {
         console.log(res.data);
         if (res.data.loginFlag === 1) {
           console.log(res.data.employee_ID);
-          router.push({ path: '/users/' + res.data.employee_ID});
+          router.push({name:"users",params:{userID:res.data.employee_ID,id:res.data.employee_ID}});
+          // router.push({ path: '/users/' + res.data.employee_ID});
         } else if(res.data.loginFlag === 0){
           alert("帳號或密碼錯誤!");
           password.value = "";
-        } else{
+        } else if(res.data.loginFlag === 2){
+          
           alert("現在不是您的上班時間唷~");
-          router.push({ path: "/" });
+          //  router.push({ path: "/users/" });
+          router.push({name:"users",params:{userID:res.data.employee_ID,id:res.data.employee_ID}});
+          // router.push({ path: '/users/' + res.data.employee_ID});
+          
         }       
       })
     }
